@@ -1,0 +1,18 @@
+{
+  "name": "GenshinAPI",
+  "version": "1.0.0",
+  "description": "API Simulating Genshin Impact gacha",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JakeFerrero/GenshinAPI.git"
+  },
+  "author": "Jake Ferrero",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JakeFerrero/GenshinAPI/issues"
+  },
+  "homepage": "https://github.com/JakeFerrero/GenshinAPI#readme"
+}

@@ -12,6 +12,7 @@
       "arrow-parens": false,
       "only-arrow-functions": false,
       "no-console": false,
+      "no-return-await": false,
       "no-namespace": false,
       "space-before-function-paren": [false, "never"],
       "no-string-literal": false,

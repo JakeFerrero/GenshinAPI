@@ -10,13 +10,15 @@
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "preserveConstEnums": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "outDir": "lib",
+    "rootDir": "src"
   },
   "include": [
-      "src/**/*.ts",
-      "test/**/*.ts"
+    "src/**/*.ts",
+    "test/**/*.ts"
   ],
   "exclude": [
-      "node_modules"
+    "node_modules"
   ]
 }

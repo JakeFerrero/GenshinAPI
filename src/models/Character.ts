@@ -1,3 +1,5 @@
+export type Vision = 'Cryo' | 'Hydro' | 'Pyro' | 'Electro' | 'Geo' | 'Anemo' | 'Dendro';
+
 /**
  * Final representation of a character. To be returned to end-user.
  */
@@ -5,6 +7,8 @@ export interface Character {
   name: string;
   weapon: string;
   rarity: 4 | 5;
+  vision: Vision;
+  affiliation?: string;
 }
 
 /**
@@ -12,8 +16,11 @@ export interface Character {
  * seen by the end-user.
  */
 export interface CharacterInternal {
-  id: string;
+  _id: string;
+  _rev: string;
   name: string;
   weapon: string;
   rarity: 4 | 5;
+  vision: Vision;
+  affiliation: string | null;
 }

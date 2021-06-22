@@ -1,34 +1,44 @@
 import { Injectable } from '@nestjs/common';
+import { Collection, Db, MongoClient } from 'mongodb';
 import { Character, CharacterInternal } from '../models/Character';
-import { CouchDbServiceClient } from '../utils/serviceClients/CouchDbServiceClient';
-import * as uuid from 'uuid';
 
 @Injectable()
 export class CharacterRepository {
-  constructor(private charServiceClient: CouchDbServiceClient) {}
+  private db: Db;
+  private characterCollection: Collection<CharacterInternal>;
 
-  public async getCharacter(id: string): Promise<Character> {
-    const charInternal = await this.charServiceClient.getCharacter(id);
-    return this.unmarshalCharacter(charInternal);
+  constructor(private mongo: MongoClient) {
+    this.db = this.mongo.db('genshin-api');
+    this.characterCollection = this.db.collection('characters');
   }
 
-  public async createCharacter(id: string, character: Character): Promise<void> {
+  public async getCharacters(): Promise<Character[]> {
+    const query = {};
+    const charIntenrals = await this.characterCollection.find(query).toArray();
+    const chars = charIntenrals.map(charInternal => this.unmarshalCharacter(charInternal));
+    console.log('characters are: ', chars);
+    return chars;
+  }
+
+  // public async getCharacter(id: string): Promise<Character> {
+  //   const charInternal = await this.charServiceClient.getCharacter(id);
+  //   return this.unmarshalCharacter(charInternal);
+  // }
+
+  public async createCharacter(character: Character): Promise<void> {
     const charInternal = this.marshalCharacter(character);
-    await this.charServiceClient.createCharacter(id, charInternal);
+    await this.characterCollection.insertOne(charInternal);
   }
 
-  public async updateCharacter(id: string, character: Character, rev: string): Promise<void> {
-    const charInternal = this.marshalCharacter(character);
-    await this.charServiceClient.updateCharacter(id, charInternal, rev);
-  }
+  // public async updateCharacter(id: string, character: Character, rev: string): Promise<void> {
+  //   const charInternal = this.marshalCharacter(character);
+  //   await this.charServiceClient.updateCharacter(id, charInternal, rev);
+  // }
 
   private unmarshalCharacter(charInternal: CharacterInternal): Character {
-    const character: Character = {
-      name: charInternal.name,
-      weapon: charInternal.weapon,
-      rarity: charInternal.rarity,
-      vision: charInternal.vision
-    };
+    const { name, weapon, rarity, vision } = charInternal;
+    const character: Character = { name, weapon, rarity, vision };
+
     if (charInternal.affiliation) character['affiliation'] = charInternal.affiliation;
     return character;
   }
@@ -36,7 +46,6 @@ export class CharacterRepository {
   private marshalCharacter(char: Character, rev?: string): CharacterInternal {
     return {
       _id: char.name.toLowerCase(),
-      _rev: rev ?? uuid.v4(),
       name: char.name,
       weapon: char.weapon,
       rarity: char.rarity,

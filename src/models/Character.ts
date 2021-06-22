@@ -17,7 +17,6 @@ export interface Character {
  */
 export interface CharacterInternal {
   _id: string;
-  _rev: string;
   name: string;
   weapon: string;
   rarity: 4 | 5;

@@ -19,8 +19,8 @@ export class CharacterController {
   // }
 
   @Post()
-  public async createCharacter(@Body() char: Character): Promise<void> {
-    // TODO: return created char
-    await this.charService.createCharacter(char);
+  public async createCharacter(@Body() character: Character): Promise<Character> {
+    await this.charService.createCharacter(character);
+    return character;
   }
 }

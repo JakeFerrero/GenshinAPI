@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { Collection, Db, MongoClient } from 'mongodb';
 import { Character, CharacterInternal } from '../models/Character';
 
@@ -13,10 +13,12 @@ export class CharacterRepository {
   }
 
   public async getCharacters(): Promise<Character[]> {
+    console.log('Fetching characters from database.');
+    // TODO: add logic for queries
     const query = {};
     const charIntenrals = await this.characterCollection.find(query).toArray();
     const chars = charIntenrals.map(charInternal => this.unmarshalCharacter(charInternal));
-    console.log('characters are: ', chars);
+    console.log('Fetched characters from database.', chars);
     return chars;
   }
 
@@ -26,14 +28,19 @@ export class CharacterRepository {
   // }
 
   public async createCharacter(character: Character): Promise<void> {
+    console.log('Adding new character to database.');
     const charInternal = this.marshalCharacter(character);
-    await this.characterCollection.insertOne(charInternal);
+    try {
+      await this.characterCollection.insertOne(charInternal);
+      console.log('Added character to database.', character);
+    } catch (error: any) {
+      console.log('Error creating new character.', error);
+      if (error?.code === 11000) {
+        throw new ConflictException('Character already exists.');
+      }
+      throw error;
+    }
   }
-
-  // public async updateCharacter(id: string, character: Character, rev: string): Promise<void> {
-  //   const charInternal = this.marshalCharacter(character);
-  //   await this.charServiceClient.updateCharacter(id, charInternal, rev);
-  // }
 
   private unmarshalCharacter(charInternal: CharacterInternal): Character {
     const { name, weapon, rarity, vision } = charInternal;

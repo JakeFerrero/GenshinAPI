@@ -6,12 +6,15 @@ import { CharacterRepository } from './CharacterRepository';
 export class CharacterService {
   constructor(private charRepo: CharacterRepository) {}
 
-  public async getCharacter(id: string): Promise<Character> {
-    return await this.charRepo.getCharacter(id);
+  public async getCharacters() {
+    return await this.charRepo.getCharacters();
   }
 
-  public async createCharacter(char: Character): Promise<void> {
-    const { name } = char;
-    await this.charRepo.createCharacter(name.toLowerCase(), char);
+  // public async getCharacter(id: string): Promise<Character> {
+  //   return await this.charRepo.getCharacter(id);
+  // }
+
+  public async createCharacter(character: Character): Promise<void> {
+    await this.charRepo.createCharacter(character);
   }
 }

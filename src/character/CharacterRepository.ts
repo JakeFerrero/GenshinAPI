@@ -1,6 +1,14 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { Collection, Db, MongoClient } from 'mongodb';
-import { Character, CharacterInternal } from '../models/Character';
+import { Character, CharacterInternal, Vision, WeaponType } from '../models/Character';
+
+export interface CharacterQueryOpts {
+  rarity: 4 | 5;
+  vision: Vision;
+  weapon: WeaponType;
+}
+
+const MONGO_CONFLICT_CODE = 11000;
 
 @Injectable()
 export class CharacterRepository {
@@ -12,33 +20,54 @@ export class CharacterRepository {
     this.characterCollection = this.db.collection('characters');
   }
 
-  public async getCharacters(): Promise<Character[]> {
+  public async getCharacters(queryOpts?: CharacterQueryOpts): Promise<Character[]> {
     console.log('Fetching characters from database.');
-    // TODO: add logic for queries
-    const query = {};
-    const charIntenrals = await this.characterCollection.find(query).toArray();
+
+    const charIntenrals = await this.characterCollection.find(queryOpts).toArray();
     const chars = charIntenrals.map(charInternal => this.unmarshalCharacter(charInternal));
+
     console.log('Fetched characters from database.', chars);
     return chars;
   }
 
-  // public async getCharacter(id: string): Promise<Character> {
-  //   const charInternal = await this.charServiceClient.getCharacter(id);
-  //   return this.unmarshalCharacter(charInternal);
-  // }
+  public async getCharacter(id: string): Promise<Character> {
+    console.log(`Fetching character with id ${id} from database.`);
+
+    const query = { _id: id };
+    const charInternal = await this.characterCollection.findOne(query);
+    if (!charInternal) {
+      throw new NotFoundException(`Character with id ${id} not found.`);
+    }
+
+    console.log(`Fetched character with id ${id} from database.`);
+    return this.unmarshalCharacter(charInternal);
+  }
 
   public async createCharacter(character: Character): Promise<void> {
     console.log('Adding new character to database.');
     const charInternal = this.marshalCharacter(character);
+
     try {
       await this.characterCollection.insertOne(charInternal);
-      console.log('Added character to database.', character);
     } catch (error: any) {
       console.log('Error creating new character.', error);
-      if (error?.code === 11000) {
+      if (error?.code === MONGO_CONFLICT_CODE) {
         throw new ConflictException('Character already exists.');
       }
       throw error;
+    }
+
+    console.log('Added character to database.', character);
+  }
+
+  public async deleteCharacter(id: string): Promise<void> {
+    console.log(`Deleting character with id ${id} from database.`);
+    const result = await this.characterCollection.deleteOne({ _id: id });
+    if (result.deletedCount === 1) {
+      console.log(`Deleted character with id ${id} from database.`);
+    } else {
+      console.log(`No character found with id ${id}. Deleted 0 characters.`);
+      throw new NotFoundException(`Character with id ${id} not found.`);
     }
   }
 

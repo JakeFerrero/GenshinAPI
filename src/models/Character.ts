@@ -1,11 +1,12 @@
 export type Vision = 'Cryo' | 'Hydro' | 'Pyro' | 'Electro' | 'Geo' | 'Anemo' | 'Dendro';
+export type WeaponType = 'Bow' | 'Claymore' | 'Sword' | 'Catalyst' | 'Polearm';
 
 /**
  * Final representation of a character. To be returned to end-user.
  */
 export interface Character {
   name: string;
-  weapon: string;
+  weapon: WeaponType;
   rarity: 4 | 5;
   vision: Vision;
   affiliation?: string;
@@ -18,7 +19,7 @@ export interface Character {
 export interface CharacterInternal {
   _id: string;
   name: string;
-  weapon: string;
+  weapon: WeaponType;
   rarity: 4 | 5;
   vision: Vision;
   affiliation: string | null;

@@ -3,9 +3,9 @@ import { Collection, Db, MongoClient } from 'mongodb';
 import { Character, CharacterInternal, Vision, WeaponType } from '../models/Character';
 
 export interface CharacterQueryOpts {
-  rarity: 4 | 5;
-  vision: Vision;
-  weapon: WeaponType;
+  rarity?: number;
+  vision?: Vision;
+  weapon?: WeaponType;
 }
 
 const MONGO_CONFLICT_CODE = 11000;

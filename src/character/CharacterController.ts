@@ -1,5 +1,6 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
-import { Character } from '../models/Character';
+import { Body, Controller, Delete, Get, Param, Post, Query } from '@nestjs/common';
+import { Character, Vision, WeaponType } from '../models/Character';
+import { CharacterQueryOpts } from './CharacterRepository';
 import { CharacterService } from './CharacterService';
 
 @Controller({
@@ -14,8 +15,17 @@ export class CharacterController {
   }
 
   @Get()
-  public async getCharacters(): Promise<Character[]> {
-    return await this.charService.getCharacters();
+  public async getCharacters(
+    @Query('vision') vision?: Vision,
+    @Query('rarity') rarity?: number,
+    @Query('weapon') weapon?: WeaponType
+  ): Promise<Character[]> {
+    const queryOpts: CharacterQueryOpts = {
+      vision,
+      rarity,
+      weapon
+    };
+    return await this.charService.getCharacters(queryOpts);
   }
 
   @Get(':id')

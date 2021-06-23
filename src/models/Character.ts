@@ -7,7 +7,7 @@ export type WeaponType = 'Bow' | 'Claymore' | 'Sword' | 'Catalyst' | 'Polearm';
 export interface Character {
   name: string;
   weapon: WeaponType;
-  rarity: 4 | 5;
+  rarity: number;
   vision: Vision;
   affiliation?: string;
 }
@@ -20,7 +20,7 @@ export interface CharacterInternal {
   _id: string;
   name: string;
   weapon: WeaponType;
-  rarity: 4 | 5;
+  rarity: number;
   vision: Vision;
   affiliation: string | null;
 }

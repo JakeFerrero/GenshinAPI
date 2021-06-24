@@ -12,14 +12,14 @@
     "strict": true,
     "preserveConstEnums": true,
     "sourceMap": true,
-    "outDir": "lib",
-    "rootDir": "src"
+    "outDir": "./lib",
+    "rootDir": "./src"
   },
   "include": [
-    "src/**/*.ts",
-    "test/**/*.ts"
+    "./src/**/*"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "test/**/*"
   ]
 }

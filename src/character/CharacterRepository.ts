@@ -1,92 +1,55 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { Collection, Db, MongoClient } from 'mongodb';
-import { Character, CharacterInternal, Vision, WeaponType } from '../models/Character';
+import * as sqlite from 'sqlite';
+import { Vision, WeaponType } from '../models/Character';
 
 export interface CharacterQueryOpts {
   rarity?: number;
   vision?: Vision;
   weapon?: WeaponType;
+  affiliation?: string;
 }
 
-const MONGO_CONFLICT_CODE = 11000;
-
-@Injectable()
 export class CharacterRepository {
-  private db: Db;
-  private characterCollection: Collection<CharacterInternal>;
+  constructor(private db: sqlite.Database) {}
 
-  constructor(private mongo: MongoClient) {
-    this.db = this.mongo.db('genshin-api');
-    this.characterCollection = this.db.collection('characters');
+  public async getByUniqueId(uid: string) {
+    console.log('Fetching character from database: ', uid);
+    const results = await this.db.get('SELECT * FROM characters WHERE name = ?', uid);
+    console.log('Received character: ', results);
+    return results;
   }
 
-  public async getCharacters(queryOpts?: CharacterQueryOpts): Promise<Character[]> {
-    console.log('Fetching characters from database.');
-
-    const charIntenrals = await this.characterCollection.find(queryOpts).toArray();
-    const chars = charIntenrals.map(charInternal => this.unmarshalCharacter(charInternal));
-
-    console.log('Fetched characters from database.', chars);
-    return chars;
-  }
-
-  public async getCharacter(id: string): Promise<Character> {
-    console.log(`Fetching character with id ${id} from database.`);
-
-    const query = { _id: id };
-    const charInternal = await this.characterCollection.findOne(query);
-    if (!charInternal) {
-      throw new NotFoundException(`Character with id ${id} not found.`);
-    }
-
-    console.log(`Fetched character with id ${id} from database.`);
-    return this.unmarshalCharacter(charInternal);
-  }
-
-  public async createCharacter(character: Character): Promise<void> {
-    console.log('Adding new character to database.');
-    const charInternal = this.marshalCharacter(character);
-
-    try {
-      await this.characterCollection.insertOne(charInternal);
-    } catch (error: any) {
-      console.log('Error creating new character.', error);
-      if (error?.code === MONGO_CONFLICT_CODE) {
-        throw new ConflictException('Character already exists.');
+  public async get(opts?: CharacterQueryOpts) {
+    let query = 'SELECT * FROM characters';
+    if (opts && Object.keys(opts).length) {
+      let subquery = '';
+      for (const key of Object.keys(opts)) {
+        if (!opts[key]) continue;
+        subquery += ` ${!subquery.length ? ' WHERE' : ' AND'} ${key} = "${opts[key]}"`;
       }
-      throw error;
+      query += subquery;
     }
 
-    console.log('Added character to database.', character);
+    console.log('Querying database for characters with query: ', query);
+    const results = await this.db.all(query);
+    console.log('Query results are: ', results);
+    return results;
   }
 
-  public async deleteCharacter(id: string): Promise<void> {
-    console.log(`Deleting character with id ${id} from database.`);
-    const result = await this.characterCollection.deleteOne({ _id: id });
-    if (result.deletedCount === 1) {
-      console.log(`Deleted character with id ${id} from database.`);
+  public async add(name: string, weapon: string, vision: string, rarity: number, affiliation?: string): Promise<void> {
+    console.log('Adding character to database: ', name, weapon, vision, rarity, affiliation);
+
+    if (affiliation) {
+      await this.db.run('INSERT INTO characters (name, weapon, vision, rarity, affiliation) VALUES (?, ?, ?, ?, ?)', name, weapon, vision, rarity, affiliation);
     } else {
-      console.log(`No character found with id ${id}. Deleted 0 characters.`);
-      throw new NotFoundException(`Character with id ${id} not found.`);
+      await this.db.run('INSERT INTO characters (name, weapon, vision, rarity) VALUES (?, ?, ?, ?)', name, weapon, vision, rarity);
     }
+
+    console.log('Character added to database');
   }
 
-  private unmarshalCharacter(charInternal: CharacterInternal): Character {
-    const { name, weapon, rarity, vision } = charInternal;
-    const character: Character = { name, weapon, rarity, vision };
-
-    if (charInternal.affiliation) character['affiliation'] = charInternal.affiliation;
-    return character;
-  }
-
-  private marshalCharacter(char: Character, rev?: string): CharacterInternal {
-    return {
-      _id: char.name.toLowerCase(),
-      name: char.name,
-      weapon: char.weapon,
-      rarity: char.rarity,
-      vision: char.vision,
-      affiliation: char.affiliation ?? null
-    };
+  public async delete(name: string): Promise<void> {
+    console.log('Deleting character from database: ', name);
+    await this.db.run('DELETE FROM characters WHERE name = ?', name);
+    console.log('Character deleted from database');
   }
 }

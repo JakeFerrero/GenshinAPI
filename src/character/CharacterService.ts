@@ -6,25 +6,26 @@ import { CharacterQueryOpts, CharacterRepository } from './CharacterRepository';
 export class CharacterService {
   constructor(private charRepo: CharacterRepository) {}
 
-  public async characterGacha(): Promise<Character> {
-    const chars = await this.charRepo.getCharacters();
+  public async gacha(): Promise<Character> {
+    const chars = await this.charRepo.get();
     const randomIndex = Math.floor(Math.random() * chars.length);
     return chars[randomIndex];
   }
 
-  public async getCharacters(queryOpts?: CharacterQueryOpts): Promise<Character[]> {
-    return await this.charRepo.getCharacters(queryOpts);
+  public async getCharacter(name: string): Promise<Character> {
+    return await this.charRepo.getByUniqueId(name);
   }
 
-  public async getCharacter(id: string): Promise<Character> {
-    return await this.charRepo.getCharacter(id);
+  public async getCharacters(queryOpts?: CharacterQueryOpts): Promise<Character[]> {
+    return await this.charRepo.get(queryOpts);
   }
 
   public async createCharacter(character: Character): Promise<void> {
-    await this.charRepo.createCharacter(character);
+    const { name, weapon, rarity, vision, affiliation } = character;
+    await this.charRepo.add(name, weapon, vision, rarity, affiliation);
   }
 
-  public async deleteCharacter(id: string): Promise<void> {
-    await this.charRepo.deleteCharacter(id);
+  public async deleteCharacter(name: string): Promise<void> {
+    await this.charRepo.delete(name);
   }
 }

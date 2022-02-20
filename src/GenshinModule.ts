@@ -1,6 +1,7 @@
 
 import { Module } from '@nestjs/common';
-import { MongoClient } from 'mongodb';
+import * as sqlite from 'sqlite';
+import * as sqlite3 from 'sqlite3';
 import { CharacterController } from './character/CharacterController';
 import { CharacterRepository } from './character/CharacterRepository';
 import { CharacterService } from './character/CharacterService';
@@ -8,20 +9,20 @@ import { CharacterService } from './character/CharacterService';
 @Module({
   controllers: [CharacterController],
   providers: [
-    CharacterRepository,
     CharacterService,
     {
-      provide: MongoClient,
-      useFactory: async (): Promise<MongoClient> => {
-        const uri = 'mongodb://localhost:27017';
-        const client = new MongoClient(uri, { useUnifiedTopology: true });
+      provide: CharacterRepository,
+      useFactory: async (): Promise<CharacterRepository> => {
         try {
-          await client.connect();
+          const dbConn = await sqlite.open({
+            filename: 'genshin_api_db',
+            driver: sqlite3.Database
+          });
+          return new CharacterRepository(dbConn);
         } catch (error) {
-          console.log('Error connecting to MongoDB. Exiting.', error);
+          console.log('Error connecting to sqlite database. Exiting.', error);
           throw error;
         }
-        return client;
       }
     }
   ]

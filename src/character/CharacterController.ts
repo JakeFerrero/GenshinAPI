@@ -11,26 +11,28 @@ export class CharacterController {
 
   @Get('gacha')
   public async gacha(): Promise<Character> {
-    return await this.charService.characterGacha();
+    return await this.charService.gacha();
   }
 
   @Get()
   public async getCharacters(
     @Query('vision') vision?: Vision,
     @Query('rarity') rarity?: number,
-    @Query('weapon') weapon?: WeaponType
+    @Query('weapon') weapon?: WeaponType,
+    @Query('affiliation') affiliation?: string
   ): Promise<Character[]> {
     const queryOpts: CharacterQueryOpts = {
       vision,
       rarity,
-      weapon
+      weapon,
+      affiliation
     };
     return await this.charService.getCharacters(queryOpts);
   }
 
-  @Get(':id')
-  public async getCharacter(@Param() id: string): Promise<Character> {
-    return await this.charService.getCharacter(id);
+  @Get(':name')
+  public async getCharacter(@Param() name: string): Promise<Character> {
+    return await this.charService.getCharacter(name);
   }
 
   @Post()
@@ -39,8 +41,8 @@ export class CharacterController {
     return character;
   }
 
-  @Delete(':id')
-  public async deleteCharacter(@Param() id: string): Promise<void> {
-    await this.charService.deleteCharacter(id);
+  @Delete(':name')
+  public async deleteCharacter(@Param() name: string): Promise<void> {
+    await this.charService.deleteCharacter(name);
   }
 }

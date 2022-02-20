@@ -19,5 +19,7 @@
       "max-classes-per-file": false,
       "no-empty": false
   },
-  "jsRules": {}
+  "jsRules": {
+    "no-console": false
+  }
 }

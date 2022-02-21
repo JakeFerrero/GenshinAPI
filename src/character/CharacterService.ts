@@ -21,8 +21,7 @@ export class CharacterService {
   }
 
   public async createCharacter(character: Character): Promise<void> {
-    const { name, weapon, rarity, vision, affiliation } = character;
-    await this.charRepo.add(name, weapon, vision, rarity, affiliation);
+    await this.charRepo.add(character);
   }
 
   public async deleteCharacter(name: string): Promise<void> {

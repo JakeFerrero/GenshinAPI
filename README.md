@@ -2,6 +2,11 @@
 API simulating the Genshin Impact gacha system, while also allowing users to view and add/delete characters and weapons, in the case more are added to the game.
 
 ## Setup
+You can ensure the proper versions of Node and NPM are installed by using
+```
+nvm i
+```
+
 Install dependancies via
 ```
 npm install
@@ -30,7 +35,13 @@ nest start
 ```
 Then use Postman, Thunderclient for VSCode, or any other API client to hit the API.
 
+## Testing
+The Jest framework is used for testing. You can run the unit and integration tests by using
+```
+npm run test
+```
+
 ## TODOs
-* Recreate unit tests since the switch from Docker+MongoDB to Sqlite.
-* Add a controller and API endpoints for weapons.
+* Add integration tests for character endpoints.
+* Add endpoints for weapons.
 * Have a gacha simulator that more accurately simulates the gacha in Genshin, where pulls include weapons or characters and have the correct rates.

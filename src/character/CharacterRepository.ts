@@ -1,5 +1,5 @@
 import * as sqlite from 'sqlite';
-import { Vision, WeaponType } from '../models/Character';
+import { Character, Vision, WeaponType } from '../models/Character';
 
 export interface CharacterQueryOpts {
   rarity?: number;
@@ -11,20 +11,21 @@ export interface CharacterQueryOpts {
 export class CharacterRepository {
   constructor(private db: sqlite.Database) {}
 
-  public async getByUniqueId(uid: string) {
+  public async getByUniqueId(uid: string): Promise<Character> {
     console.log('Fetching character from database: ', uid);
     const results = await this.db.get('SELECT * FROM characters WHERE name = ?', uid);
     console.log('Received character: ', results);
     return results;
   }
 
-  public async get(opts?: CharacterQueryOpts) {
+  public async get(opts?: CharacterQueryOpts): Promise<Character[]> {
     let query = 'SELECT * FROM characters';
     if (opts && Object.keys(opts).length) {
       let subquery = '';
       for (const key of Object.keys(opts)) {
         if (!opts[key]) continue;
-        subquery += ` ${!subquery.length ? ' WHERE' : ' AND'} ${key} = "${opts[key]}"`;
+        const value = typeof opts[key] === 'string' ? `\"${opts[key]}\"` : opts[key];
+        subquery += `${!subquery.length ? ' WHERE' : ' AND'} ${key} = ${value}`;
       }
       query += subquery;
     }
@@ -35,7 +36,8 @@ export class CharacterRepository {
     return results;
   }
 
-  public async add(name: string, weapon: string, vision: string, rarity: number, affiliation?: string): Promise<void> {
+  public async add(character: Character): Promise<void> {
+    const { name, weapon, vision, rarity, affiliation } = character;
     console.log('Adding character to database: ', name, weapon, vision, rarity, affiliation);
 
     if (affiliation) {

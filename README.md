@@ -45,4 +45,3 @@ npm run test
 * Add integration tests for character endpoints.
 * Add endpoints for weapons.
 * Have a gacha simulator that more accurately simulates the gacha in Genshin, where pulls include weapons or characters and have the correct rates.
-* todo
